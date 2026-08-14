@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Clock } from "lucide-react";
+import { X, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Clock, Plus, Tag } from "lucide-react";
 import { useStore } from "../store/useStore";
 
 const THEME_STYLES = {
@@ -9,15 +9,28 @@ const THEME_STYLES = {
   light: { bgOverlay: "bg-slate-900/40", bgCard: "bg-white", textMain: "text-slate-900", textMuted: "text-slate-500", border: "border-slate-200", inputBg: "bg-slate-50", hover: "hover:bg-slate-100" }
 };
 
+// Helper warna grup yang kontras dan enak dilihat
+const getGroupBadgeStyle = (groupName: string) => {
+  const name = groupName.toLowerCase();
+  if (name.includes('kebutuhan') || name.includes('housing')) return 'bg-blue-500/15 text-blue-400 border border-blue-500/30';
+  if (name.includes('keinginan') || name.includes('shopping')) return 'bg-purple-500/15 text-purple-400 border border-purple-500/30';
+  if (name.includes('tabungan')) return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+  if (name.includes('food') || name.includes('makan')) return 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+  if (name.includes('transport')) return 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30';
+  if (name.includes('utang') || name.includes('hutang')) return 'bg-rose-500/15 text-rose-400 border border-rose-500/30';
+  return 'bg-zinc-500/15 text-zinc-400 border border-zinc-500/30';
+};
+
 export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen: boolean, onClose: () => void, editingId?: string | null }) {
   const themeMode = useStore((state) => state.theme || "dark");
   const T = THEME_STYLES[themeMode as keyof typeof THEME_STYLES];
   
-  const categories = useStore((state) => state.categories);
+  const categories = useStore((state: any) => state.categories);
   const wallets = useStore((state) => state.wallets);
   const transactions = useStore((state) => state.transactions);
   const addTransaction = useStore((state) => state.addTransaction);
   const updateTransaction = useStore((state) => state.updateTransaction);
+  const addCategory = useStore((state: any) => state.addCategory);
 
   const [type, setType] = useState<"expense" | "income" | "transfer">("expense");
   const [amount, setAmount] = useState("");
@@ -25,8 +38,15 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
   const [wallet, setWallet] = useState("");
   const [toWallet, setToWallet] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [time, setTime] = useState(new Date().toTimeString().slice(0, 5)); // Jam default saat ini
+  const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
   const [note, setNote] = useState("");
+
+  // State Dropdown Kategori Bertingkat & Tambah Kategori
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [isAddCatOpen, setIsAddCatOpen] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
+  const [newCatGroup, setNewCatGroup] = useState("Kebutuhan");
+  const [newCatEmoji, setNewCatEmoji] = useState("📁");
 
   useEffect(() => {
     if (isOpen) {
@@ -57,6 +77,31 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
 
   if (!isOpen) return null;
 
+  // Filter & Kelompokkan kategori berdasarkan Grup (Subkategori)
+  const filteredCategories = categories.filter((c: any) => type === 'transfer' ? true : c.type === type);
+  const groupedCategories = filteredCategories.reduce((acc: any, cat: any) => {
+    const groupName = cat.group || 'Lainnya';
+    if (!acc[groupName]) acc[groupName] = [];
+    acc[groupName].push(cat);
+    return acc;
+  }, {});
+
+  const handleSaveCategory = () => {
+    if (!newCatName) return;
+    const newCat = {
+      id: `cat_${Date.now()}`,
+      name: newCatName,
+      emoji: newCatEmoji,
+      type: type === 'income' ? 'income' : 'expense' as const,
+      group: newCatGroup,
+      color: type === 'income' ? 'bg-amber-400 text-amber-500' : 'bg-rose-500 text-rose-500'
+    };
+    addCategory(newCat);
+    setCategory(newCatName);
+    setIsAddCatOpen(false);
+    setNewCatName("");
+  };
+
   const handleSave = () => {
     if (!amount || !wallet) return;
 
@@ -80,8 +125,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
 
     onClose();
   };
-
-  const filteredCategories = categories.filter(c => c.type === type);
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${T.bgOverlay} backdrop-blur-sm transition-opacity animate-in fade-in duration-200`}>
@@ -116,15 +159,50 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
             </div>
           </div>
 
-          {/* KATEGORI (Hanya jika bukan transfer) */}
+          {/* KATEGORI BERTINGKAT & TOMBOL TAMBAH (Hanya jika bukan transfer) */}
           {type !== 'transfer' && (
-            <div>
+            <div className="relative">
               <label className={`block text-xs font-bold ${T.textMuted} uppercase tracking-wider mb-2`}>Kategori</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className={`w-full px-4 py-3.5 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm font-semibold outline-none`}>
-                {filteredCategories.map(cat => (
-                  <option key={cat.id} value={cat.name} className="bg-[#18181b] text-white">{cat.emoji} {cat.name}</option>
-                ))}
-              </select>
+              <div 
+                onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                className={`w-full px-4 py-3.5 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm font-semibold flex justify-between items-center cursor-pointer`}
+              >
+                <span>{category || "-- Pilih Kategori --"}</span>
+                <Tag size={16} className={T.textMuted} />
+              </div>
+
+              {/* DROPDOWN KATEGORI DENGAN GRUP & SUBKATEGORI BERWARNA RAPI */}
+              {isCategoryDropdownOpen && (
+                <div className={`absolute left-0 right-0 mt-2 rounded-2xl shadow-2xl border ${T.border} ${T.bgCard} z-20 max-h-64 overflow-y-auto p-3 space-y-3`}>
+                  <button 
+                    onClick={() => { setIsCategoryDropdownOpen(false); setIsAddCatOpen(true); }}
+                    className="w-full flex items-center justify-center gap-2 p-3 rounded-xl text-blue-400 font-bold text-xs bg-blue-500/10 hover:bg-blue-500/20 transition-colors border border-blue-500/30"
+                  >
+                    <Plus size={16} /> Tambah Kategori Baru
+                  </button>
+
+                  {Object.keys(groupedCategories).map(groupName => (
+                    <div key={groupName} className="space-y-1.5">
+                      {/* Badge Header Grup dengan Warna Khusus */}
+                      <div className={`inline-block px-3 py-1 rounded-lg text-[11px] font-extrabold uppercase tracking-wider ${getGroupBadgeStyle(groupName)}`}>
+                        {groupName}
+                      </div>
+                      <div className="space-y-1 pl-1">
+                        {groupedCategories[groupName].map((cat: any) => (
+                          <div 
+                            key={cat.id}
+                            onClick={() => { setCategory(cat.name); setIsCategoryDropdownOpen(false); }}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer ${T.hover} text-sm font-medium ${T.textMain} transition-colors`}
+                          >
+                            <span className="text-base">{cat.emoji}</span>
+                            <span>{cat.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -191,6 +269,38 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
         </div>
 
       </div>
+
+      {/* MODAL KECIL TAMBAH KATEGORI BARU */}
+      {isAddCatOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className={`${T.bgCard} w-full max-w-sm rounded-[32px] p-6 border ${T.border} shadow-2xl space-y-4`}>
+            <div className="flex justify-between items-center">
+              <h3 className={`text-lg font-bold ${T.textMain}`}>Buat Kategori Baru</h3>
+              <button onClick={() => setIsAddCatOpen(false)} className={`p-1.5 rounded-full ${T.hover} ${T.textMuted}`}><X size={18}/></button>
+            </div>
+            <div>
+              <label className={`block text-xs font-bold ${T.textMuted} mb-1 uppercase`}>Emoji & Nama</label>
+              <div className="flex gap-2">
+                <input type="text" value={newCatEmoji} onChange={(e) => setNewCatEmoji(e.target.value)} className={`w-14 text-center p-3 rounded-xl ${T.inputBg} border ${T.border} text-lg`} />
+                <input type="text" value={newCatName} onChange={(e) => setNewCatName(e.target.value)} placeholder="Nama Kategori..." className={`flex-1 p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm outline-none`} />
+              </div>
+            </div>
+            <div>
+              <label className={`block text-xs font-bold ${T.textMuted} mb-1 uppercase`}>Grup (Induk)</label>
+              <select value={newCatGroup} onChange={(e) => setNewCatGroup(e.target.value)} className={`w-full p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm outline-none`}>
+                <option value="Kebutuhan">Kebutuhan</option>
+                <option value="Keinginan">Keinginan</option>
+                <option value="Tabungan">Tabungan</option>
+                <option value="Food & Drinks">Food & Drinks</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Housing">Housing</option>
+                <option value="Transportation">Transportation</option>
+              </select>
+            </div>
+            <button onClick={handleSaveCategory} className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-sm shadow-md">Simpan Kategori</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -36,26 +36,40 @@ interface AppState {
   deleteWallet: (id: string) => void;
 }
 
+// PALET WARNA DIJAMIN BEDA RUMPUN & KONTRAS (TIDAK ADA LAGI WARNA MIRIP)
+const getGroupColor = (groupName: string) => {
+  const g = (groupName || '').toLowerCase();
+  if (g.includes('food') || g.includes('makan')) return 'bg-amber-500/20 text-amber-300 border border-amber-500/40';
+  if (g.includes('shop') || g.includes('belanja')) return 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40';
+  if (g.includes('hous') || g.includes('rumah')) return 'bg-sky-500/20 text-sky-300 border border-sky-500/40';
+  if (g.includes('transport')) return 'bg-teal-500/20 text-teal-300 border border-teal-500/40';
+  if (g.includes('vehic') || g.includes('kendaraan')) return 'bg-orange-500/20 text-orange-300 border border-orange-500/40'; 
+  if (g.includes('life') || g.includes('entertain') || g.includes('hobi')) return 'bg-violet-500/20 text-violet-300 border border-violet-500/40'; 
+  if (g.includes('financ') || g.includes('utang') || g.includes('admin')) return 'bg-rose-500/20 text-rose-300 border border-rose-500/40';
+  if (g.includes('income') || g.includes('gaji') || g.includes('pemasukan')) return 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+  return 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/40';
+};
+
 const DEFAULT_CATEGORIES: Category[] = [
-    { id: 'e1', name: 'Makan & Minum', emoji: '🍔', type: 'expense', group: 'Food & Drinks', color: 'bg-rose-500 text-rose-500' },
-    { id: 'e2', name: 'Restoran, Cafe', emoji: '☕', type: 'expense', group: 'Food & Drinks', color: 'bg-rose-500 text-rose-500' },
-    { id: 'e3', name: 'Bahan Makanan', emoji: '🛒', type: 'expense', group: 'Food & Drinks', color: 'bg-rose-500 text-rose-500' },
-    { id: 'e4', name: 'Belanja Bulanan', emoji: '🛍️', type: 'expense', group: 'Shopping', color: 'bg-sky-500 text-sky-500' },
-    { id: 'e5', name: 'Pakaian & Sepatu', emoji: '👕', type: 'expense', group: 'Shopping', color: 'bg-sky-500 text-sky-500' },
-    { id: 'e6', name: 'Kesehatan & Beauty', emoji: '💄', type: 'expense', group: 'Shopping', color: 'bg-sky-500 text-sky-500' },
-    { id: 'e7', name: 'Sewa Rumah/Kos', emoji: '🏠', type: 'expense', group: 'Housing', color: 'bg-orange-400 text-orange-400' },
-    { id: 'e8', name: 'Listrik & Air', emoji: '⚡', type: 'expense', group: 'Housing', color: 'bg-orange-400 text-orange-400' },
-    { id: 'e9', name: 'Internet & TV', emoji: '🌐', type: 'expense', group: 'Housing', color: 'bg-orange-400 text-orange-400' },
-    { id: 'e10', name: 'Transportasi Umum', emoji: '🚌', type: 'expense', group: 'Transportation', color: 'bg-slate-500 text-slate-500' },
-    { id: 'e11', name: 'Taksi / Ojol', emoji: '🚕', type: 'expense', group: 'Transportation', color: 'bg-slate-500 text-slate-500' },
-    { id: 'e12', name: 'Bensin', emoji: '⛽', type: 'expense', group: 'Vehicle', color: 'bg-purple-500 text-purple-500' },
-    { id: 'e13', name: 'Servis & Perawatan', emoji: '🔧', type: 'expense', group: 'Vehicle', color: 'bg-purple-500 text-purple-500' },
-    { id: 'e14', name: 'Hobi & Hiburan', emoji: '🎮', type: 'expense', group: 'Life & Entertainment', color: 'bg-lime-500 text-lime-500' },
-    { id: 'e15', name: 'Liburan & Jalan-jalan', emoji: '✈️', type: 'expense', group: 'Life & Entertainment', color: 'bg-lime-500 text-lime-500' },
-    { id: 'e16', name: 'Admin Bank & Pajak', emoji: '💳', type: 'expense', group: 'Financial Expenses', color: 'bg-teal-600 text-teal-600' },
-    { id: 'i1', name: 'Gaji & Bonus', emoji: '💰', type: 'income', group: 'Income', color: 'bg-amber-400 text-amber-500' },
-    { id: 'i2', name: 'Hasil Investasi', emoji: '📈', type: 'income', group: 'Income', color: 'bg-amber-400 text-amber-500' },
-    { id: 'i3', name: 'Pemasukan Lain', emoji: '🎁', type: 'income', group: 'Income', color: 'bg-amber-400 text-amber-500' },
+    { id: 'e1', name: 'Makan & Minum', emoji: '🍔', type: 'expense', group: 'Food & Drinks', color: getGroupColor('Food & Drinks') },
+    { id: 'e2', name: 'Restoran, Cafe', emoji: '☕', type: 'expense', group: 'Food & Drinks', color: getGroupColor('Food & Drinks') },
+    { id: 'e3', name: 'Bahan Makanan', emoji: '🛒', type: 'expense', group: 'Food & Drinks', color: getGroupColor('Food & Drinks') },
+    { id: 'e4', name: 'Belanja Bulanan', emoji: '🛍️', type: 'expense', group: 'Shopping', color: getGroupColor('Shopping') },
+    { id: 'e5', name: 'Pakaian & Sepatu', emoji: '👕', type: 'expense', group: 'Shopping', color: getGroupColor('Shopping') },
+    { id: 'e6', name: 'Kesehatan & Beauty', emoji: '💄', type: 'expense', group: 'Shopping', color: getGroupColor('Shopping') },
+    { id: 'e7', name: 'Sewa Rumah/Kos', emoji: '🏠', type: 'expense', group: 'Housing', color: getGroupColor('Housing') },
+    { id: 'e8', name: 'Listrik & Air', emoji: '⚡', type: 'expense', group: 'Housing', color: getGroupColor('Housing') },
+    { id: 'e9', name: 'Internet & TV', emoji: '🌐', type: 'expense', group: 'Housing', color: getGroupColor('Housing') },
+    { id: 'e10', name: 'Transportasi Umum', emoji: '🚌', type: 'expense', group: 'Transportation', color: getGroupColor('Transportation') },
+    { id: 'e11', name: 'Taksi / Ojol', emoji: '🚕', type: 'expense', group: 'Transportation', color: getGroupColor('Transportation') },
+    { id: 'e12', name: 'Bensin', emoji: '⛽', type: 'expense', group: 'Vehicle', color: getGroupColor('Vehicle') },
+    { id: 'e13', name: 'Servis & Perawatan', emoji: '🔧', type: 'expense', group: 'Vehicle', color: getGroupColor('Vehicle') },
+    { id: 'e14', name: 'Hobi & Hiburan', emoji: '🎮', type: 'expense', group: 'Life & Entertainment', color: getGroupColor('Life & Entertainment') },
+    { id: 'e15', name: 'Liburan & Jalan-jalan', emoji: '✈️', type: 'expense', group: 'Life & Entertainment', color: getGroupColor('Life & Entertainment') },
+    { id: 'e16', name: 'Admin Bank & Pajak', emoji: '💳', type: 'expense', group: 'Financial Expenses', color: getGroupColor('Financial Expenses') },
+    { id: 'i1', name: 'Gaji & Bonus', emoji: '💰', type: 'income', group: 'Income', color: getGroupColor('Income') },
+    { id: 'i2', name: 'Hasil Investasi', emoji: '📈', type: 'income', group: 'Income', color: getGroupColor('Income') },
+    { id: 'i3', name: 'Pemasukan Lain', emoji: '🎁', type: 'income', group: 'Income', color: getGroupColor('Income') },
 ];
 
 export const useStore = create<AppState>()(
@@ -107,12 +121,23 @@ export const useStore = create<AppState>()(
             note: t.note
           })).sort((a, b) => new Date(`${b.date}T${b.time}`).getTime() - new Date(`${a.date}T${a.time}`).getTime()) : [];
 
+          const resolvedCategories = catData && catData.length > 0 
+            ? [...DEFAULT_CATEGORIES, ...catData.map(c => ({ 
+                id: c.id, 
+                name: c.name, 
+                emoji: c.emoji, 
+                type: c.type, 
+                group: c.group, 
+                color: getGroupColor(c.group) 
+              }))] 
+            : DEFAULT_CATEGORIES;
+
           set(() => ({
             wallets: walletsData ? walletsData.map(w => ({ id: w.id, name: w.name, type: w.type, initialBalance: Number(w.initial_balance), color: w.color, bg: w.bg })) : [],
             transactions: formattedTx,
             targets: targetData ? targetData.map(t => ({ id: t.id, name: t.name, emoji: t.emoji, targetAmount: Number(t.target_amount), currentAmount: Number(t.current_amount), deadlineDate: t.deadline_date, durationMonths: t.duration_months, color: t.color, isBought: t.is_bought })) : [],
             debts: debtData ? debtData.map(d => ({ id: d.id, name: d.name, emoji: d.emoji, totalAmount: Number(d.total_amount), paidAmount: Number(d.paid_amount), tenorMonths: d.tenor_months, firstDueDate: d.first_due_date, type: d.type, color: d.color })) : [],
-            categories: catData && catData.length > 0 ? [...DEFAULT_CATEGORIES, ...catData.map(c => ({ id: c.id, name: c.name, emoji: c.emoji, type: c.type, group: c.group, color: c.color }))] : DEFAULT_CATEGORIES
+            categories: resolvedCategories
           }));
         } catch (error) {
           console.error("Gagal menarik data", error);
@@ -185,9 +210,10 @@ export const useStore = create<AppState>()(
       },
 
       addCategory: async (category) => {
-        set((state) => ({ categories: [...state.categories, category] }));
+        const coloredCategory = { ...category, color: getGroupColor(category.group) };
+        set((state) => ({ categories: [...state.categories, coloredCategory] }));
         const { data: { user } } = await supabase.auth.getUser();
-        if(user) await supabase.from('categories').insert([{ id: category.id, user_id: user.id, name: category.name, emoji: category.emoji, type: category.type, "group": category.group, color: category.color }]);
+        if(user) await supabase.from('categories').insert([{ id: category.id, user_id: user.id, name: category.name, emoji: category.emoji, type: category.type, "group": category.group, color: coloredCategory.color }]);
       },
     }),
     {
