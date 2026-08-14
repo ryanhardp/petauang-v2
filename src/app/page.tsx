@@ -174,15 +174,20 @@ export default function Home() {
           </div>
         </div>
 
-        <nav className={`md:hidden absolute bottom-0 left-0 w-full ${themeMode === 'dark' ? 'bg-[#18181b]/95 border-white/5' : 'bg-white/95 border-slate-200'} backdrop-blur-2xl border-t z-40 pb-safe pt-2 px-2 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-colors duration-300`}>
-          <div className="flex justify-between items-center relative mb-2 max-w-md mx-auto">
-             <button onClick={() => setActiveTab("Dashboard")} className={`flex-1 flex flex-col items-center justify-center py-2 gap-1.5 transition-colors ${activeTab === "Dashboard" ? A.textCol : T.textMuted}`}><LayoutGrid size={24} strokeWidth={activeTab === "Dashboard" ? 2.5 : 2} /></button>
-             <button onClick={() => setActiveTab("Dompet")} className={`flex-1 flex flex-col items-center justify-center py-2 gap-1.5 transition-colors ${activeTab === "Dompet" ? A.textCol : T.textMuted}`}><Wallet size={24} strokeWidth={activeTab === "Dompet" ? 2.5 : 2} /></button>
-             <div className="flex-1 flex justify-center -mt-10 relative z-50">
-                <button onClick={handleAddTxClick} className={`${A.bg} ${A.text} hover:scale-105 w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-transform border-4 ${themeMode === 'dark' ? 'border-[#09090b]' : 'border-[#F3F4F6]'} rotate-3 hover:rotate-6`}><Plus size={32} strokeWidth={3} /></button>
+        {/* NAVBAR MOBILE SUDAH DIUPDATE: Analytics & Target masuk dengan susunan rapi & simetris */}
+        <nav className={`md:hidden absolute bottom-0 left-0 w-full ${themeMode === 'dark' ? 'bg-[#18181b]/95 border-white/5' : 'bg-white/95 border-slate-200'} backdrop-blur-2xl border-t z-40 pb-safe pt-2 px-1 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-colors duration-300`}>
+          <div className="flex justify-between items-center relative mb-2 max-w-full mx-auto">
+             <button onClick={() => setActiveTab("Dashboard")} className={`flex-1 flex flex-col items-center justify-center py-2 transition-colors ${activeTab === "Dashboard" ? A.textCol : T.textMuted}`}><LayoutGrid size={22} strokeWidth={activeTab === "Dashboard" ? 2.5 : 2} /></button>
+             <button onClick={() => setActiveTab("Dompet")} className={`flex-1 flex flex-col items-center justify-center py-2 transition-colors ${activeTab === "Dompet" ? A.textCol : T.textMuted}`}><Wallet size={22} strokeWidth={activeTab === "Dompet" ? 2.5 : 2} /></button>
+             <button onClick={() => setActiveTab("Analytics")} className={`flex-1 flex flex-col items-center justify-center py-2 transition-colors ${activeTab === "Analytics" ? A.textCol : T.textMuted}`}><PieChart size={22} strokeWidth={activeTab === "Analytics" ? 2.5 : 2} /></button>
+             
+             <div className="flex-shrink-0 flex justify-center -mt-10 relative z-50 mx-1">
+                <button onClick={handleAddTxClick} className={`${A.bg} ${A.text} hover:scale-105 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform border-4 ${themeMode === 'dark' ? 'border-[#09090b]' : 'border-[#F3F4F6]'} rotate-3 hover:rotate-6`}><Plus size={28} strokeWidth={3} /></button>
              </div>
-             <button onClick={() => setActiveTab("Transaksi")} className={`flex-1 flex flex-col items-center justify-center py-2 gap-1.5 transition-colors ${activeTab === "Transaksi" ? A.textCol : T.textMuted}`}><ArrowRightLeft size={24} strokeWidth={activeTab === "Transaksi" ? 2.5 : 2} /></button>
-             <button onClick={() => setActiveTab("Utang")} className={`flex-1 flex flex-col items-center justify-center py-2 gap-1.5 transition-colors ${activeTab === "Utang" ? A.textCol : T.textMuted}`}><HandCoins size={24} strokeWidth={activeTab === "Utang" ? 2.5 : 2} /></button>
+             
+             <button onClick={() => setActiveTab("Transaksi")} className={`flex-1 flex flex-col items-center justify-center py-2 transition-colors ${activeTab === "Transaksi" ? A.textCol : T.textMuted}`}><ArrowRightLeft size={22} strokeWidth={activeTab === "Transaksi" ? 2.5 : 2} /></button>
+             <button onClick={() => setActiveTab("Target")} className={`flex-1 flex flex-col items-center justify-center py-2 transition-colors ${activeTab === "Target" ? A.textCol : T.textMuted}`}><Target size={22} strokeWidth={activeTab === "Target" ? 2.5 : 2} /></button>
+             <button onClick={() => setActiveTab("Utang")} className={`flex-1 flex flex-col items-center justify-center py-2 transition-colors ${activeTab === "Utang" ? A.textCol : T.textMuted}`}><HandCoins size={22} strokeWidth={activeTab === "Utang" ? 2.5 : 2} /></button>
           </div>
         </nav>
 
