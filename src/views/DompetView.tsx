@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-// Gua masukin 'Crown' ke dalam import lucide-react biar ga error lagi!
 import { Plus, Wallet as WalletIcon, Landmark, Banknote, ArrowRightLeft, MoreVertical, PiggyBank, Edit3, Trash2, Crown } from "lucide-react";
 import { useStore } from "../store/useStore";
 import ModalDompet from "../components/ModalDompet";
@@ -148,7 +147,7 @@ export default function DompetView({ onAddTx }: { onAddTx?: () => void }) {
       <ModalDompet 
         isOpen={isWalletModalOpen} 
         onClose={() => setIsWalletModalOpen(false)} 
-        editingId={editingWalletId} 
+        {...({ editingId: editingWalletId } as any)}
       />
     </div>
   );

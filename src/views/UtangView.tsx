@@ -84,6 +84,7 @@ export default function UtangView() {
         amount: Number(payAmount),
         type: debtInfo.type === 'utang' ? "expense" : "income", // Utang ngurangin dompet, Piutang nambahin dompet
         date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().slice(0, 5), // <--- DITAMBAHKAN DI SINI SUPAYA TIDAK ERROR TYPESCRIPT
         note: `Cicilan: ${debtInfo.name}`
       });
     }
@@ -209,14 +210,14 @@ export default function UtangView() {
             </div>
             <div className="p-6 space-y-4">
               <div className={`flex p-1 rounded-2xl ${T.inputBg} border ${T.border}`}>
-                 <button onClick={() => setNewType("utang")} className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${newType === "utang" ? "bg-rose-500 text-white shadow-md" : T.textMuted}`}>Saya Berutang</button>
-                 <button onClick={() => setNewType("piutang")} className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${newType === "piutang" ? "bg-emerald-500 text-white shadow-md" : T.textMuted}`}>Orang Berutang</button>
+                   <button onClick={() => setNewType("utang")} className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${newType === "utang" ? "bg-rose-500 text-white shadow-md" : T.textMuted}`}>Saya Berutang</button>
+                   <button onClick={() => setNewType("piutang")} className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${newType === "piutang" ? "bg-emerald-500 text-white shadow-md" : T.textMuted}`}>Orang Berutang</button>
               </div>
               <div><label className={`block text-xs font-bold ${T.textMuted} mb-2 uppercase tracking-wider`}>Kepada / Dari Siapa?</label><input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Contoh: Bank, Teman..." className={`w-full p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} outline-none focus:border-blue-500 transition-colors`} /></div>
               
               <div className="grid grid-cols-2 gap-4">
-                 <div><label className={`block text-xs font-bold ${T.textMuted} mb-2 uppercase tracking-wider`}>Total Utang (Rp)</label><input type="text" inputMode="numeric" value={newAmount === "" ? "" : new Intl.NumberFormat('id-ID').format(Number(newAmount))} onChange={(e) => setNewAmount(e.target.value.replace(/[^0-9]/g, ""))} placeholder="0" className={`w-full p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} font-bold outline-none focus:border-blue-500 transition-colors`} /></div>
-                 <div><label className={`block text-xs font-bold ${T.textMuted} mb-2 uppercase tracking-wider`}>Tenor (Bulan)</label><input type="number" value={newTenor} onChange={(e) => setNewTenor(e.target.value)} placeholder="Contoh: 12" className={`w-full p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} font-bold outline-none focus:border-blue-500 transition-colors`} /></div>
+                   <div><label className={`block text-xs font-bold ${T.textMuted} mb-2 uppercase tracking-wider`}>Total Utang (Rp)</label><input type="text" inputMode="numeric" value={newAmount === "" ? "" : new Intl.NumberFormat('id-ID').format(Number(newAmount))} onChange={(e) => setNewAmount(e.target.value.replace(/[^0-9]/g, ""))} placeholder="0" className={`w-full p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} font-bold outline-none focus:border-blue-500 transition-colors`} /></div>
+                   <div><label className={`block text-xs font-bold ${T.textMuted} mb-2 uppercase tracking-wider`}>Tenor (Bulan)</label><input type="number" value={newTenor} onChange={(e) => setNewTenor(e.target.value)} placeholder="Contoh: 12" className={`w-full p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} font-bold outline-none focus:border-blue-500 transition-colors`} /></div>
               </div>
 
               <div><label className={`block text-xs font-bold ${T.textMuted} mb-2 uppercase tracking-wider`}>Tanggal Jatuh Tempo Pertama</label><input type="date" value={newDueDate} onChange={(e) => setNewDueDate(e.target.value)} className={`w-full p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} outline-none [color-scheme:dark]`} /></div>

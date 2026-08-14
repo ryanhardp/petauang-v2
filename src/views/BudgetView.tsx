@@ -109,7 +109,7 @@ export default function BudgetView() {
     const groupCategories = categories.filter((c: any) => c.group === groupName);
     const groupTotalLimit = getLimit(limitKey);
     
-    // 2. Bagi rata limit grup ke masing-masing kategori (Bisa dikembangkan jadi custom nanti)
+    // 2. Bagi rata limit grup ke masing-masing kategori
     const defaultLimitPerCat = groupCategories.length > 0 ? Math.floor(groupTotalLimit / groupCategories.length) : 0;
 
     // 3. Mapping data asli
@@ -203,10 +203,10 @@ export default function BudgetView() {
         </div>
       </div>
 
-      {/* LIST KATEGORI (SEKARANG 100% ASLI NARIK DARI DATA LU) */}
+      {/* LIST KATEGORI */}
       {budgetGroups.map((group, gIdx) => {
         const limit = group.limit;
-        const terpakai = group.items.reduce((s, i) => s + i.terpakai, 0);
+        const terpakai = group.items.reduce((s: number, i: any) => s + i.terpakai, 0);
         return (
           <div key={gIdx} className="mb-8">
             <div className="flex justify-between items-center mb-3">
@@ -224,7 +224,7 @@ export default function BudgetView() {
               {group.items.length === 0 ? (
                  <p className={`text-xs ${T.textMuted} italic`}>Belum ada kategori di grup ini.</p>
               ) : (
-                group.items.map((item, idx) => {
+                group.items.map((item: any, idx: number) => {
                   const progress = Math.min((item.terpakai / item.batas) * 100, 100) || 0;
                   return (
                     <div key={idx} className={`${T.bgCard} p-5 md:p-6 rounded-3xl flex items-center gap-4 md:gap-6 hover:scale-[1.01] transition-transform`}>

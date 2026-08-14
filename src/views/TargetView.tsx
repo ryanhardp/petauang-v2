@@ -99,6 +99,7 @@ export default function TargetView() {
         amount: Number(addedAmount),
         type: "transfer",
         date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().slice(0, 5), // <--- DITAMBAHKAN DI SINI SUPAYA TIDAK ERROR TYPESCRIPT
         note: `Alokasi dana ke Target`
       });
     }
@@ -127,6 +128,7 @@ export default function TargetView() {
         amount: Number(buyAmount),
         type: "expense",
         date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().slice(0, 5), // <--- DITAMBAHKAN JUGA DI SINI
         note: `Pembelian Target Final`
       });
       // Tandai target sudah dibeli. Di DompetView, uangnya nggak akan dihitung lagi = Total Kekayaan Drop!
@@ -353,9 +355,9 @@ export default function TargetView() {
               <button onClick={handleBuyTarget} disabled={!buyAmount || !buyCategory} className={`w-full py-4 rounded-xl font-bold text-sm text-white transition-all shadow-md ${(!buyAmount || !buyCategory) ? "bg-emerald-600/50 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-700"}`}>Konfirmasi Pembelian</button>
             </div>
           </div>
-        </div>
-      )}
+      </div>
+    )}
 
-    </div>
+  </div>
   );
 }

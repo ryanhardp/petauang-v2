@@ -49,7 +49,8 @@ export default function PengeluaranChart() {
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)' 
                 }}
                 itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
-                formatter={(value) => `Rp ${value.toLocaleString('id-ID')}`}
+                // INI BAGIAN YANG DIPERBAIKI BIAR GAK ERROR TS
+                formatter={(value: any) => `Rp ${Number(value || 0).toLocaleString('id-ID')}`}
               />
             </PieChart>
           </ResponsiveContainer>
