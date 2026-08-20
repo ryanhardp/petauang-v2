@@ -11,29 +11,37 @@ const THEME_STYLES = {
 
 const ICONS = { cash: Banknote, ewallet: WalletIcon, bank: Landmark, savings: PiggyBank };
 
-// 20 WARNA YANG BENER-BENER BEDA TOTAL (Gak ada rumus aneh-aneh lagi)
-const DISTINCT_COLORS = [
-  '#ef4444', // 0: Red
-  '#3b82f6', // 1: Blue
-  '#f59e0b', // 2: Amber/Yellow
-  '#10b981', // 3: Emerald/Green
-  '#8b5cf6', // 4: Violet/Purple
-  '#06b6d4', // 5: Cyan/Light Blue
-  '#ec4899', // 6: Pink
-  '#f97316', // 7: Orange
-  '#84cc16', // 8: Lime/Yellow-Green
-  '#6366f1', // 9: Indigo
-  '#14b8a6', // 10: Teal
-  '#f43f5e', // 11: Rose
-  '#d946ef', // 12: Fuchsia
-  '#0ea5e9', // 13: Sky
-  '#eab308', // 14: Dark Yellow
-  '#22c55e', // 15: Normal Green
-  '#a855f7', // 16: Normal Purple
-  '#f472b6', // 17: Light Pink
-  '#fb923c', // 18: Light Orange
-  '#38bdf8'  // 19: Light Sky
+// 1. KAMUS WARNA PERMANEN: Kategori lu dikunci di warna kontras tinggi ini
+const PREDEFINED_COLORS: Record<string, string> = {
+  "Makan & Minum": "#ef4444",      // Merah Gonjreng
+  "Taksi / Ojol": "#3b82f6",       // Biru Terang
+  "Bayar Utang": "#a855f7",        // Ungu
+  "Transportasi Umum": "#eab308",  // Kuning / Emas
+  "Bahan Makanan": "#22c55e",      // Hijau Daun
+  "Kecantikan": "#ec4899",         // Pink
+  "Listrik & Air": "#f97316",      // Orange
+  "Belanja Bulanan": "#06b6d4",    // Cyan / Biru Muda
+  "Hiburan": "#6366f1",            // Indigo
+  "Bensin": "#84cc16",             // Lime / Hijau Muda Stabilo
+  "Kesehatan & Beauty": "#d946ef", // Fuchsia
+};
+
+// 2. WARNA CADANGAN: Kalau ada kategori baru, ambil dari sini (Sama-sama kontras)
+const FALLBACK_COLORS = [
+  '#14b8a6', '#f43f5e', '#0ea5e9', '#8b5cf6', '#10b981', 
+  '#f59e0b', '#c026d3', '#059669', '#dc2626', '#2563eb'
 ];
+
+// FUNGSI PENGUNCI WARNA: Nggak ada lagi Math.random() yang bikin berubah pas refresh!
+const getPersistentColor = (catName: string) => {
+  if (PREDEFINED_COLORS[catName]) return PREDEFINED_COLORS[catName];
+  
+  let hash = 0;
+  for (let i = 0; i < catName.length; i++) {
+    hash = catName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return FALLBACK_COLORS[Math.abs(hash) % FALLBACK_COLORS.length];
+};
 
 export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const themeMode = useStore((state) => state.theme || "dark");
@@ -78,7 +86,7 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
   const totalIncomeMonth = monthTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const totalExpenseMonth = monthTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
-  // --- LOGIKA WARNA DIKUNCI KE DATABASE ---
+  // --- LOGIKA CHART PENGELUARAN YANG UDAH DIKUNCI WARNANYA ---
   const currentMonthExpenses = monthTransactions.filter(tx => tx.type === 'expense');
   const expenseByCategory = currentMonthExpenses.reduce((acc, tx) => {
       acc[tx.category] = (acc[tx.category] || 0) + tx.amount; return acc;
@@ -89,14 +97,7 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
   const allExpenses = Object.entries(expenseByCategory)
       .sort((a, b) => b[1] - a[1]) 
       .map(([name, amount]) => {
-          // Cari urutan pendaftaran kategori ini di database
-          const catIndex = categories.findIndex((c: any) => c.name === name);
-          
-          // Pakai urutan database buat nyari warna. Jadi warnanya permanen!
-          const safeIndex = catIndex !== -1 ? catIndex : Math.floor(Math.random() * DISTINCT_COLORS.length);
-          const assignedColor = DISTINCT_COLORS[safeIndex % DISTINCT_COLORS.length];
-
-          return { name, amount, colorHex: assignedColor };
+          return { name, amount, colorHex: getPersistentColor(name) };
       });
       
   let currentConicPercentage = 0;
