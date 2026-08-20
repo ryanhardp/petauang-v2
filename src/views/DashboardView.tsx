@@ -11,27 +11,20 @@ const THEME_STYLES = {
 
 const ICONS = { cash: Banknote, ewallet: WalletIcon, bank: Landmark, savings: PiggyBank };
 
-// PALET WARNA NEON KHUSUS GRAFIK BIAR KONTRAS & GA NUMPUK
+// PALET WARNA KHUSUS GRAFIK (Akan dikunci ke nama kategori secara permanen)
 const CHART_COLORS = [
-  '#f43f5e', // Rose / Merah
-  '#3b82f6', // Blue / Biru
-  '#fbbf24', // Amber / Kuning
-  '#10b981', // Emerald / Hijau
-  '#a855f7', // Purple / Ungu
-  '#06b6d4', // Cyan / Biru Muda
-  '#ec4899', // Pink
-  '#f97316'  // Orange
+  '#10b981', '#3b82f6', '#fbbf24', '#f43f5e', '#a855f7', 
+  '#06b6d4', '#ec4899', '#f97316', '#84cc16', '#6366f1'
 ];
 
-const COLOR_MAP: Record<string, string> = {
-  'rose-500': '#f43f5e', 'sky-500': '#0ea5e9', 'orange-400': '#fb923c', 'slate-500': '#64748b',
-  'purple-500': '#a855f7', 'lime-500': '#84cc16', 'teal-600': '#0d9488', 'amber-400': '#fbbf24',
-  'amber-500': '#f59e0b', 'emerald-500': '#10b981', 'blue-500': '#3b82f6', 'gray-500': '#6b7280'
-};
-
-const getHexColor = (twClass: string) => {
-   for (const key in COLOR_MAP) { if (twClass.includes(key)) return COLOR_MAP[key]; }
-   return '#94a3b8';
+// FUNGSI PINTAR: Ngunci warna berdasarkan teks nama kategori (Warna ga akan pernah ketukar)
+const getColorForCategory = (categoryName: string) => {
+  let hash = 0;
+  for (let i = 0; i < categoryName.length; i++) {
+    hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % CHART_COLORS.length;
+  return CHART_COLORS[index];
 };
 
 export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
@@ -40,16 +33,14 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
   const userName = useStore((state) => state.userName);
   const [hideSaldo, setHideSaldo] = useState(false);
 
-  // FITUR TAMBAHAN: EDIT DASHBOARD
   const [isEditing, setIsEditing] = useState(false);
   const dashboardWidgets = useStore((state) => state.dashboardWidgets);
   const toggleWidget = useStore((state) => state.toggleWidget);
 
   const wallets = useStore((state) => state.wallets) || [];
   const transactions = useStore((state) => state.transactions) || [];
-  const categories = useStore((state) => state.categories) || [];
+  const categories = useStore((state: any) => state.categories || []);
 
-  // FORMAT RUPIAH YANG JELAS ADA "Rp"-NYA
   const formatRupiah = (val: number) => hideSaldo ? "Rp ********" : `Rp ${new Intl.NumberFormat('id-ID').format(val)}`;
 
   const calculateRealBalance = (walletName: string, initialBalance: number) => {
@@ -68,7 +59,6 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
       realBalance: calculateRealBalance(w.name, w.initialBalance)
   }));
 
-  // HITUNG PEMASUKAN & PENGELUARAN BULAN INI
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
   
@@ -80,7 +70,7 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
   const totalIncomeMonth = monthTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const totalExpenseMonth = monthTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
-  // STRUKTUR PENGELUARAN DENGAN PALET WARNA NEON BARU
+  // --- LOGIKA GRAFIK BARU (SEMUA KATEGORI MASUK) ---
   const currentMonthExpenses = monthTransactions.filter(tx => tx.type === 'expense');
   const expenseByCategory = currentMonthExpenses.reduce((acc, tx) => {
       acc[tx.category] = (acc[tx.category] || 0) + tx.amount; return acc;
@@ -88,16 +78,15 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
 
   const totalExpenseThisMonth = Object.values(expenseByCategory).reduce((a,b) => a+b, 0);
   
-  const topExpenses = Object.entries(expenseByCategory)
-      .sort((a, b) => b[1] - a[1]) // Urutkan pengeluaran dari terbesar dulu
-      .slice(0, 4) // Ambil 4 terbesar
-      .map(([name, amount], index) => {
-          // Suntik warna berurutan dari palet CHART_COLORS
-          return { name, amount, colorHex: CHART_COLORS[index % CHART_COLORS.length] };
+  // Ambil SEMUA pengeluaran, urutkan dari yang terbesar, kunci warnanya
+  const allExpenses = Object.entries(expenseByCategory)
+      .sort((a, b) => b[1] - a[1]) 
+      .map(([name, amount]) => {
+          return { name, amount, colorHex: getColorForCategory(name) };
       });
       
   let currentConicPercentage = 0;
-  const conicGradientString = topExpenses.length > 0 ? topExpenses.map(d => {
+  const conicGradientString = allExpenses.length > 0 ? allExpenses.map(d => {
       const percentage = (d.amount / totalExpenseThisMonth) * 100;
       const str = `${d.colorHex} ${currentConicPercentage}% ${currentConicPercentage + percentage}%`;
       currentConicPercentage += percentage;
@@ -124,7 +113,6 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
         </div>
       </div>
 
-      {/* PANEL EDIT DASHBOARD */}
       {isEditing && (
         <div className={`mb-6 p-4 rounded-2xl ${T.bgCard} border border-blue-500/30 flex gap-4 overflow-x-auto`}>
           {['wallets', 'summary', 'chart', 'transactions'].map(w => (
@@ -135,7 +123,6 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
         </div>
       )}
 
-      {/* KARTU DOMPET */}
       {dashboardWidgets.includes('wallets') && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {displayWallets.map(w => {
@@ -153,7 +140,6 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
         </div>
       )}
 
-      {/* RINGKASAN & CHART */}
       {(dashboardWidgets.includes('summary') || dashboardWidgets.includes('chart')) && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {dashboardWidgets.includes('summary') && (
@@ -188,21 +174,22 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
           )}
 
           {dashboardWidgets.includes('chart') && (
-            <div className={`${T.bgCard} border ${T.border} rounded-3xl p-6 shadow-sm flex flex-col`}>
+            <div className={`${T.bgCard} border ${T.border} rounded-3xl p-6 shadow-sm flex flex-col max-h-[400px]`}>
               <h3 className={`font-bold ${T.textMain} mb-6`}>Struktur Pengeluaran</h3>
               {totalExpenseThisMonth === 0 ? (
                   <div className="flex-1 flex items-center justify-center text-sm font-bold text-zinc-500">Belum ada pengeluaran di bulan ini.</div>
               ) : (
                   <>
-                    <div className="flex-1 flex justify-center items-center mb-6 mt-2">
+                    <div className="flex justify-center items-center mb-6 mt-2 shrink-0">
                       <div className="w-32 h-32 rounded-full relative shadow-inner" style={{ background: `conic-gradient(${conicGradientString})` }}>
                           <div className={`absolute inset-3 rounded-full ${T.bgCard}`}></div>
                       </div>
                     </div>
-                    <div className="space-y-3">
-                      {topExpenses.map(exp => (
+                    {/* BAGIAN LEGEND BISA DI-SCROLL */}
+                    <div className="space-y-3 overflow-y-auto no-scrollbar pr-2 flex-1">
+                      {allExpenses.map(exp => (
                         <div key={exp.name} className="flex justify-between items-center text-sm">
-                          <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full`} style={{backgroundColor: exp.colorHex}}></div><span className={`font-semibold ${T.textMain}`}>{exp.name}</span></div>
+                          <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full shrink-0`} style={{backgroundColor: exp.colorHex}}></div><span className={`font-semibold ${T.textMain} truncate max-w-[120px]`}>{exp.name}</span></div>
                           <span className={`font-bold ${T.textMuted}`}>{formatRupiah(exp.amount)}</span>
                         </div>
                       ))}
@@ -228,7 +215,7 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
               {recentTransactions.map(tx => {
                 const isIncome = tx.type === 'income';
                 const isTransfer = tx.type === 'transfer';
-                const catData = categories.find(c => c.name === tx.category);
+                const catData = categories.find((c: any) => c.name === tx.category);
                 const displayEmoji = isTransfer ? <ArrowRightLeft size={16}/> : (catData ? catData.emoji : (isIncome ? <ArrowUpRight size={16}/> : <ArrowDownRight size={16}/>));
                 const displayColor = isTransfer ? 'bg-blue-500' : (catData ? catData.color.split(' ')[0] : 'bg-slate-500');
                 

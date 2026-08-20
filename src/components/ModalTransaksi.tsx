@@ -281,8 +281,22 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
             <div>
               <label className={`block text-xs font-bold ${T.textMuted} mb-1 uppercase`}>Emoji & Nama</label>
               <div className="flex gap-2">
-                <input type="text" value={newCatEmoji} onChange={(e) => setNewCatEmoji(e.target.value)} className={`w-14 text-center p-3 rounded-xl ${T.inputBg} border ${T.border} text-lg`} />
-                <input type="text" value={newCatName} onChange={(e) => setNewCatName(e.target.value)} placeholder="Nama Kategori..." className={`flex-1 p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm outline-none`} />
+                {/* BAGIAN YANG DIPERBAIKI: Ditambahin maxLength & styling cursor biar aktif diklik */}
+                <input 
+                  type="text" 
+                  maxLength={2}
+                  value={newCatEmoji} 
+                  onChange={(e) => setNewCatEmoji(e.target.value)} 
+                  className={`w-14 text-center p-3 rounded-xl ${T.inputBg} border ${T.border} text-lg cursor-pointer focus:ring-2 focus:ring-blue-500`} 
+                  title="Klik lalu pencet Windows + Titik untuk masukin Emoji"
+                />
+                <input 
+                  type="text" 
+                  value={newCatName} 
+                  onChange={(e) => setNewCatName(e.target.value)} 
+                  placeholder="Nama Kategori..." 
+                  className={`flex-1 p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm outline-none`} 
+                />
               </div>
             </div>
             <div>
