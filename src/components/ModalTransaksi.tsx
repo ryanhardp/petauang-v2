@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Clock, Plus, Tag } from "lucide-react";
 import { useStore } from "../store/useStore";
 
@@ -9,7 +9,28 @@ const THEME_STYLES = {
   light: { bgOverlay: "bg-slate-900/40", bgCard: "bg-white", textMain: "text-slate-900", textMuted: "text-slate-500", border: "border-slate-200", inputBg: "bg-slate-50", hover: "hover:bg-slate-100" }
 };
 
-// Helper warna grup yang kontras dan enak dilihat
+// 175+ Emoji Super Lengkap Khusus Aplikasi Keuangan
+const PREDEFINED_EMOJIS = [
+  // Makanan & Minuman
+  "🍽️", "🍔", "🍕", "🌭", "🍟", "🍗", "🥩", "🍣", "🍱", "🍜", "🍞", "🥐", "🥞", "🥗", "🌮", "🍰", "🍩", "🍨", "☕", "🍵", "🍹", "🍺", "🍷", "🍎", "🍉", "🍓", "🥑", "🥦",
+  // Transportasi
+  "🚗", "🚕", "🚙", "🚌", "🚑", "🚓", "🚒", "🚚", "🚲", "🛵", "🏍️", "🚂", "🚆", "🚇", "✈️", "🛫", "🚁", "⛵", "🚢", "⛽", "🅿️", "🚥",
+  // Rumah & Tagihan
+  "🏠", "🏡", "🏢", "🛏️", "🛋️", "🚿", "🚽", "🧹", "🧻", "🧼", "🧽", "💡", "⚡", "💧", "🔥", "🗑️", "🛠️", "🔧", "🔨", "📡", "🔌",
+  // Belanja & Pakaian
+  "🛒", "🛍️", "🎁", "👕", "👖", "👗", "👘", "👙", "👚", "👛", "👜", "👝", "🎒", "👞", "👟", "👠", "👡", "👢", "👑", "👒", "🎩", "💄", "💍", "💎",
+  // Kesehatan & Perawatan
+  "🏥", "💊", "💉", "🩺", "🩹", "🦷", "🦴", "👓", "💇‍♀️", "💇‍♂️", "💅", "💆‍♀️", "💆‍♂️", "💈", "🧴",
+  // Hiburan, Olahraga & Hobi
+  "🎮", "🕹️", "🎲", "🎬", "🍿", "🎧", "🎵", "🎸", "🎹", "📸", "📺", "⚽", "🏀", "🏈", "🎾", "🏸", "🥊", "🚲", "🏊‍♂️", "🏋️‍♂️", "🏕️", "🏖️", "🎡", "🎨", "📚", "📖",
+  // Keuangan & Bisnis
+  "💰", "🪙", "💵", "💸", "💳", "🧾", "💹", "💲", "🏦", "💼", "📈", "📉",
+  // Keluarga, Bayi & Hewan
+  "👶", "🍼", "🧸", "👨‍👩‍👧‍👦", "🐶", "🐱", "🐭", "🐰", "🦊", "🐻", "🐼", "🐟", "🐾",
+  // Edukasi & Lain-lain
+  "🎓", "🎒", "🏫", "✏️", "✒️", "📝", "📱", "💻", "⌚", "⏰", "⏳", "✉️", "📦"
+];
+
 const getGroupBadgeStyle = (groupName: string) => {
   const name = groupName.toLowerCase();
   if (name.includes('kebutuhan') || name.includes('housing')) return 'bg-blue-500/15 text-blue-400 border border-blue-500/30';
@@ -41,12 +62,14 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
   const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
   const [note, setNote] = useState("");
 
-  // State Dropdown Kategori Bertingkat & Tambah Kategori
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [isAddCatOpen, setIsAddCatOpen] = useState(false);
   const [newCatName, setNewCatName] = useState("");
   const [newCatGroup, setNewCatGroup] = useState("Kebutuhan");
-  const [newCatEmoji, setNewCatEmoji] = useState("📁");
+  const [newCatEmoji, setNewCatEmoji] = useState("🍽️");
+  
+  // STATE BUAT MUNCULIN KOTAK PILIHAN EMOJI
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -77,7 +100,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
 
   if (!isOpen) return null;
 
-  // Filter & Kelompokkan kategori berdasarkan Grup (Subkategori)
   const filteredCategories = categories.filter((c: any) => type === 'transfer' ? true : c.type === type);
   const groupedCategories = filteredCategories.reduce((acc: any, cat: any) => {
     const groupName = cat.group || 'Lainnya';
@@ -137,7 +159,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
 
         <div className="p-6 overflow-y-auto space-y-5 no-scrollbar">
           
-          {/* TIPE TRANSAKSI */}
           <div className={`flex p-1 rounded-2xl ${T.inputBg} border ${T.border}`}>
             <button onClick={() => setType("expense")} className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${type === "expense" ? "bg-rose-500 text-white shadow-md" : T.textMuted}`}>
               <ArrowDownRight size={16}/> Pengeluaran
@@ -150,7 +171,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
             </button>
           </div>
 
-          {/* NOMINAL */}
           <div>
             <label className={`block text-xs font-bold ${T.textMuted} uppercase tracking-wider mb-2`}>Nominal (Rp)</label>
             <div className={`flex items-center px-4 py-3.5 rounded-xl ${T.inputBg} border ${T.border} focus-within:border-blue-500`}>
@@ -159,7 +179,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
             </div>
           </div>
 
-          {/* KATEGORI BERTINGKAT & TOMBOL TAMBAH (Hanya jika bukan transfer) */}
           {type !== 'transfer' && (
             <div className="relative">
               <label className={`block text-xs font-bold ${T.textMuted} uppercase tracking-wider mb-2`}>Kategori</label>
@@ -171,7 +190,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
                 <Tag size={16} className={T.textMuted} />
               </div>
 
-              {/* DROPDOWN KATEGORI DENGAN GRUP & SUBKATEGORI BERWARNA RAPI */}
               {isCategoryDropdownOpen && (
                 <div className={`absolute left-0 right-0 mt-2 rounded-2xl shadow-2xl border ${T.border} ${T.bgCard} z-20 max-h-64 overflow-y-auto p-3 space-y-3`}>
                   <button 
@@ -183,7 +201,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
 
                   {Object.keys(groupedCategories).map(groupName => (
                     <div key={groupName} className="space-y-1.5">
-                      {/* Badge Header Grup dengan Warna Khusus */}
                       <div className={`inline-block px-3 py-1 rounded-lg text-[11px] font-extrabold uppercase tracking-wider ${getGroupBadgeStyle(groupName)}`}>
                         {groupName}
                       </div>
@@ -206,7 +223,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
             </div>
           )}
 
-          {/* SUMBER / TUJUAN DOMPET */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={`block text-xs font-bold ${T.textMuted} uppercase tracking-wider mb-2`}>{type === 'transfer' ? 'Dari Dompet' : 'Dompet'}</label>
@@ -234,7 +250,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
             )}
           </div>
 
-          {/* JIKA TRANSFER, TANGGAL & JAM DISINI */}
           {type === 'transfer' && (
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -255,7 +270,6 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
             </div>
           )}
 
-          {/* CATATAN */}
           <div>
             <label className={`block text-xs font-bold ${T.textMuted} uppercase tracking-wider mb-2`}>Catatan (Opsional)</label>
             <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Contoh: Bensin motor, makan siang..." className={`w-full px-4 py-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm font-semibold outline-none`} />
@@ -272,33 +286,46 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
 
       {/* MODAL KECIL TAMBAH KATEGORI BARU */}
       {isAddCatOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className={`${T.bgCard} w-full max-w-sm rounded-[32px] p-6 border ${T.border} shadow-2xl space-y-4`}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className={`${T.bgCard} w-full max-w-sm rounded-[32px] p-6 border ${T.border} shadow-2xl space-y-4 relative`}>
             <div className="flex justify-between items-center">
               <h3 className={`text-lg font-bold ${T.textMain}`}>Buat Kategori Baru</h3>
               <button onClick={() => setIsAddCatOpen(false)} className={`p-1.5 rounded-full ${T.hover} ${T.textMuted}`}><X size={18}/></button>
             </div>
+            
             <div>
               <label className={`block text-xs font-bold ${T.textMuted} mb-1 uppercase`}>Emoji & Nama</label>
-              <div className="flex gap-2">
-                {/* BAGIAN YANG DIPERBAIKI: Ditambahin maxLength & styling cursor biar aktif diklik */}
-                <input 
-                  type="text" 
-                  maxLength={2}
-                  value={newCatEmoji} 
-                  onChange={(e) => setNewCatEmoji(e.target.value)} 
-                  className={`w-14 text-center p-3 rounded-xl ${T.inputBg} border ${T.border} text-lg cursor-pointer focus:ring-2 focus:ring-blue-500`} 
-                  title="Klik lalu pencet Windows + Titik untuk masukin Emoji"
-                />
-                <input 
-                  type="text" 
-                  value={newCatName} 
-                  onChange={(e) => setNewCatName(e.target.value)} 
-                  placeholder="Nama Kategori..." 
-                  className={`flex-1 p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm outline-none`} 
-                />
+              <div className="flex gap-2 relative">
+                
+                {/* TOMBOL PEMICU KOTAK EMOJI */}
+                <button 
+                  type="button"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className={`w-14 h-[46px] flex items-center justify-center rounded-xl ${T.inputBg} border ${T.border} text-xl transition hover:bg-white/10 shrink-0`}
+                >
+                  {newCatEmoji}
+                </button>
+
+                {/* KOTAK PILIHAN EMOJI DENGAN SCROLL & 175+ ITEM */}
+                {showEmojiPicker && (
+                  <div className={`absolute top-14 left-0 z-50 p-3 rounded-2xl shadow-xl border ${T.border} ${T.bgCard} grid grid-cols-6 gap-2 w-72 max-h-64 overflow-y-auto no-scrollbar`}>
+                    {PREDEFINED_EMOJIS.map(e => (
+                      <button
+                        key={e}
+                        type="button"
+                        onClick={() => { setNewCatEmoji(e); setShowEmojiPicker(false); }}
+                        className="text-2xl p-1.5 hover:bg-white/10 rounded-xl transition flex items-center justify-center"
+                      >
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <input type="text" value={newCatName} onChange={(e) => setNewCatName(e.target.value)} placeholder="Nama Kategori..." className={`flex-1 p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm outline-none w-full`} />
               </div>
             </div>
+
             <div>
               <label className={`block text-xs font-bold ${T.textMuted} mb-1 uppercase`}>Grup (Induk)</label>
               <select value={newCatGroup} onChange={(e) => setNewCatGroup(e.target.value)} className={`w-full p-3 rounded-xl ${T.inputBg} border ${T.border} ${T.textMain} text-sm outline-none`}>
@@ -311,7 +338,7 @@ export default function ModalTransaksi({ isOpen, onClose, editingId }: { isOpen:
                 <option value="Transportation">Transportation</option>
               </select>
             </div>
-            <button onClick={handleSaveCategory} className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-sm shadow-md">Simpan Kategori</button>
+            <button onClick={handleSaveCategory} className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-sm shadow-md mt-2">Simpan Kategori</button>
           </div>
         </div>
       )}

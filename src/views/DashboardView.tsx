@@ -11,21 +11,29 @@ const THEME_STYLES = {
 
 const ICONS = { cash: Banknote, ewallet: WalletIcon, bank: Landmark, savings: PiggyBank };
 
-// PALET WARNA KHUSUS GRAFIK (Akan dikunci ke nama kategori secara permanen)
-const CHART_COLORS = [
-  '#10b981', '#3b82f6', '#fbbf24', '#f43f5e', '#a855f7', 
-  '#06b6d4', '#ec4899', '#f97316', '#84cc16', '#6366f1'
+// 20 WARNA YANG BENER-BENER BEDA TOTAL (Gak ada rumus aneh-aneh lagi)
+const DISTINCT_COLORS = [
+  '#ef4444', // 0: Red
+  '#3b82f6', // 1: Blue
+  '#f59e0b', // 2: Amber/Yellow
+  '#10b981', // 3: Emerald/Green
+  '#8b5cf6', // 4: Violet/Purple
+  '#06b6d4', // 5: Cyan/Light Blue
+  '#ec4899', // 6: Pink
+  '#f97316', // 7: Orange
+  '#84cc16', // 8: Lime/Yellow-Green
+  '#6366f1', // 9: Indigo
+  '#14b8a6', // 10: Teal
+  '#f43f5e', // 11: Rose
+  '#d946ef', // 12: Fuchsia
+  '#0ea5e9', // 13: Sky
+  '#eab308', // 14: Dark Yellow
+  '#22c55e', // 15: Normal Green
+  '#a855f7', // 16: Normal Purple
+  '#f472b6', // 17: Light Pink
+  '#fb923c', // 18: Light Orange
+  '#38bdf8'  // 19: Light Sky
 ];
-
-// FUNGSI PINTAR: Ngunci warna berdasarkan teks nama kategori (Warna ga akan pernah ketukar)
-const getColorForCategory = (categoryName: string) => {
-  let hash = 0;
-  for (let i = 0; i < categoryName.length; i++) {
-    hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % CHART_COLORS.length;
-  return CHART_COLORS[index];
-};
 
 export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const themeMode = useStore((state) => state.theme || "dark");
@@ -70,7 +78,7 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
   const totalIncomeMonth = monthTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const totalExpenseMonth = monthTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
-  // --- LOGIKA GRAFIK BARU (SEMUA KATEGORI MASUK) ---
+  // --- LOGIKA WARNA DIKUNCI KE DATABASE ---
   const currentMonthExpenses = monthTransactions.filter(tx => tx.type === 'expense');
   const expenseByCategory = currentMonthExpenses.reduce((acc, tx) => {
       acc[tx.category] = (acc[tx.category] || 0) + tx.amount; return acc;
@@ -78,11 +86,17 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
 
   const totalExpenseThisMonth = Object.values(expenseByCategory).reduce((a,b) => a+b, 0);
   
-  // Ambil SEMUA pengeluaran, urutkan dari yang terbesar, kunci warnanya
   const allExpenses = Object.entries(expenseByCategory)
       .sort((a, b) => b[1] - a[1]) 
       .map(([name, amount]) => {
-          return { name, amount, colorHex: getColorForCategory(name) };
+          // Cari urutan pendaftaran kategori ini di database
+          const catIndex = categories.findIndex((c: any) => c.name === name);
+          
+          // Pakai urutan database buat nyari warna. Jadi warnanya permanen!
+          const safeIndex = catIndex !== -1 ? catIndex : Math.floor(Math.random() * DISTINCT_COLORS.length);
+          const assignedColor = DISTINCT_COLORS[safeIndex % DISTINCT_COLORS.length];
+
+          return { name, amount, colorHex: assignedColor };
       });
       
   let currentConicPercentage = 0;
@@ -185,7 +199,6 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
                           <div className={`absolute inset-3 rounded-full ${T.bgCard}`}></div>
                       </div>
                     </div>
-                    {/* BAGIAN LEGEND BISA DI-SCROLL */}
                     <div className="space-y-3 overflow-y-auto no-scrollbar pr-2 flex-1">
                       {allExpenses.map(exp => (
                         <div key={exp.name} className="flex justify-between items-center text-sm">
@@ -201,7 +214,6 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
         </div>
       )}
 
-      {/* TRANSAKSI TERBARU */}
       {dashboardWidgets.includes('transactions') && (
         <div className={`${T.bgCard} border ${T.border} rounded-3xl p-6 shadow-sm`}>
           <div className="flex justify-between items-center mb-6">
