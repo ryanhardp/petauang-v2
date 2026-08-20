@@ -11,6 +11,18 @@ const THEME_STYLES = {
 
 const ICONS = { cash: Banknote, ewallet: WalletIcon, bank: Landmark, savings: PiggyBank };
 
+// PALET WARNA NEON KHUSUS GRAFIK BIAR KONTRAS & GA NUMPUK
+const CHART_COLORS = [
+  '#f43f5e', // Rose / Merah
+  '#3b82f6', // Blue / Biru
+  '#fbbf24', // Amber / Kuning
+  '#10b981', // Emerald / Hijau
+  '#a855f7', // Purple / Ungu
+  '#06b6d4', // Cyan / Biru Muda
+  '#ec4899', // Pink
+  '#f97316'  // Orange
+];
+
 const COLOR_MAP: Record<string, string> = {
   'rose-500': '#f43f5e', 'sky-500': '#0ea5e9', 'orange-400': '#fb923c', 'slate-500': '#64748b',
   'purple-500': '#a855f7', 'lime-500': '#84cc16', 'teal-600': '#0d9488', 'amber-400': '#fbbf24',
@@ -68,19 +80,21 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
   const totalIncomeMonth = monthTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const totalExpenseMonth = monthTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
-  // STRUKTUR PENGELUARAN
+  // STRUKTUR PENGELUARAN DENGAN PALET WARNA NEON BARU
   const currentMonthExpenses = monthTransactions.filter(tx => tx.type === 'expense');
   const expenseByCategory = currentMonthExpenses.reduce((acc, tx) => {
       acc[tx.category] = (acc[tx.category] || 0) + tx.amount; return acc;
   }, {} as Record<string, number>);
 
   const totalExpenseThisMonth = Object.values(expenseByCategory).reduce((a,b) => a+b, 0);
+  
   const topExpenses = Object.entries(expenseByCategory)
-      .map(([name, amount]) => {
-          const cat = categories.find(c => c.name === name);
-          return { name, amount, colorHex: cat ? getHexColor(cat.color) : '#888' };
-      })
-      .sort((a, b) => b.amount - a.amount).slice(0, 4);
+      .sort((a, b) => b[1] - a[1]) // Urutkan pengeluaran dari terbesar dulu
+      .slice(0, 4) // Ambil 4 terbesar
+      .map(([name, amount], index) => {
+          // Suntik warna berurutan dari palet CHART_COLORS
+          return { name, amount, colorHex: CHART_COLORS[index % CHART_COLORS.length] };
+      });
       
   let currentConicPercentage = 0;
   const conicGradientString = topExpenses.length > 0 ? topExpenses.map(d => {
@@ -125,7 +139,7 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
       {dashboardWidgets.includes('wallets') && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {displayWallets.map(w => {
-              const Icon = ICONS[w.type] || WalletIcon;
+              const Icon = ICONS[w.type as keyof typeof ICONS] || WalletIcon;
               return (
                 <div key={w.id} onClick={() => setActiveTab("Dompet")} className={`${T.bgCard} border ${T.border} rounded-3xl p-6 cursor-pointer hover:-translate-y-1 transition-all shadow-sm group`}>
                   <div className="flex justify-between items-start mb-4">
