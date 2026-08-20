@@ -11,31 +11,37 @@ const THEME_STYLES = {
 
 const ICONS = { cash: Banknote, ewallet: WalletIcon, bank: Landmark, savings: PiggyBank };
 
-// 1. KAMUS WARNA PERMANEN: Kategori lu dikunci di warna kontras tinggi ini
+// KAMUS WARNA MUTLAK (PALET SAINS): 100% Dijamin mata nggak bakal ngeliat warna yang kembar
 const PREDEFINED_COLORS: Record<string, string> = {
-  "Makan & Minum": "#ef4444",      // Merah Gonjreng
-  "Taksi / Ojol": "#3b82f6",       // Biru Terang
-  "Bayar Utang": "#a855f7",        // Ungu
-  "Transportasi Umum": "#eab308",  // Kuning / Emas
-  "Bahan Makanan": "#22c55e",      // Hijau Daun
-  "Kecantikan": "#ec4899",         // Pink
-  "Listrik & Air": "#f97316",      // Orange
-  "Belanja Bulanan": "#06b6d4",    // Cyan / Biru Muda
-  "Hiburan": "#6366f1",            // Indigo
-  "Bensin": "#84cc16",             // Lime / Hijau Muda Stabilo
-  "Kesehatan & Beauty": "#d946ef", // Fuchsia
+  "Makan & Minum": "#e6194B",         // Merah Terang
+  "Restoran, Cafe": "#f58231",        // Orange
+  "Bahan Makanan": "#3cb44b",         // Hijau Daun
+  "Belanja Bulanan": "#4363d8",       // Biru Tua
+  "Pakaian & Sepatu": "#f032e6",      // Magenta / Pink Terang
+  "Kesehatan & Beauty": "#fabed4",    // Pink Muda
+  "Sewa Rumah/Kos": "#469990",        // Teal / Hijau Kebiruan Gelap
+  "Listrik & Air": "#bfef45",         // Lime / Hijau Kuning
+  "Internet & TV": "#dcbeff",         // Lavender / Ungu Muda
+  "Transportasi Umum": "#ffe119",     // Kuning Terang (Gonjreng)
+  "Taksi / Ojol": "#42d4f4",          // Cyan / Biru Muda Terang
+  "Bensin": "#9A6324",                // Coklat
+  "Servis & Perawatan": "#fffac8",    // Beige / Kuning Sangat Pucat
+  "Hobi & Hiburan": "#800000",        // Maroon / Merah Gelap
+  "Liburan & Jalan-jalan": "#aaffc3", // Mint / Hijau Pucat
+  "Admin Bank & Pajak": "#808000",    // Olive / Hijau Lumut
+  "Bayar Utang": "#911eb4",           // Ungu Tua
 };
 
-// 2. WARNA CADANGAN: Kalau ada kategori baru, ambil dari sini (Sama-sama kontras)
+// WARNA CADANGAN (Sangat beda dan gonjreng): Kalau lu nambah sub-kategori baru di luar yang 17
 const FALLBACK_COLORS = [
-  '#14b8a6', '#f43f5e', '#0ea5e9', '#8b5cf6', '#10b981', 
-  '#f59e0b', '#c026d3', '#059669', '#dc2626', '#2563eb'
+  '#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#A133FF', '#33FFA1', '#FF8C33', '#8C33FF', '#33FF8C'
 ];
 
-// FUNGSI PENGUNCI WARNA: Nggak ada lagi Math.random() yang bikin berubah pas refresh!
 const getPersistentColor = (catName: string) => {
+  // Kalau ada di daftar Sub-Kategori lu (dari video), kasih warna mutlaknya
   if (PREDEFINED_COLORS[catName]) return PREDEFINED_COLORS[catName];
   
+  // Kalau Sub-Kategori baru, kasih warna cadangan yang konsisten
   let hash = 0;
   for (let i = 0; i < catName.length; i++) {
     hash = catName.charCodeAt(i) + ((hash << 5) - hash);
@@ -86,9 +92,10 @@ export default function DashboardView({ setActiveTab }: { setActiveTab: (tab: st
   const totalIncomeMonth = monthTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const totalExpenseMonth = monthTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
-  // --- LOGIKA CHART PENGELUARAN YANG UDAH DIKUNCI WARNANYA ---
+  // --- LOGIKA CHART PENGELUARAN (MEMISAHKAN SUB-KATEGORI) ---
   const currentMonthExpenses = monthTransactions.filter(tx => tx.type === 'expense');
   const expenseByCategory = currentMonthExpenses.reduce((acc, tx) => {
+      // tx.category di sini menyimpan nama SUB-KATEGORI (Makan & Minum, dll)
       acc[tx.category] = (acc[tx.category] || 0) + tx.amount; return acc;
   }, {} as Record<string, number>);
 
